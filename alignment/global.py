@@ -1,18 +1,58 @@
 import sys
-
-def scoring_matrix(file):
-	scoring_dict = {}
-	with open(file, 'r') as text:
-		text = text.readlines()
-		nucleotides = text[0].strip().split(" ")[1:]
-		for lines in text[1:]:
-			lines = lines.strip().split()
-			scoring_dict[lines[0]] = {nucleotides[j-1]: lines[j] for j in range(1, len(nucleotides)+1)}
-	return scoring_dict
+import pandas as pd
+import numpy as np
 
 
+def build_scoring_matrix(file):
+    scoring_dict = {}
+    with open(file, "r") as text:
+        text = text.readlines()
+        nucleotides = text[0].strip().split(" ")[1:]
+    for lines in text[1:]:
+        lines = lines.strip().split()
+        scoring_dict[lines[0]] = {
+            nucleotides[index - 1]: lines[index]
+            for index in range(1, len(nucleotides) + 1)
+        }
+    return pd.DataFrame(scoring_dict)
 
-scoring_matrix('standard.m')
+
+def initialize_alignment_table(file):
+    with open(file, "r") as text:
+        text = text.readlines()
+        first_line = list(text[0].strip())
+        first_line.insert(0, "-")
+        second_line = list(text[1].strip())
+        second_line.insert(0, "-")
+    alignment_table = pd.DataFrame(np.empty((len(second_line), len(first_line))))
+    alignment_table.columns = first_line
+    alignment_table.index = second_line
+    first_row_values = np.arange(-1, -(len(first_line)), -1)
+    second_row_values = np.arange(-1, -(len(second_line)), -1)
+    alignment_table.iloc[0,1:]=[item for item in first_row_values]
+    alignment_table.iloc[1:,0]=second_row_values
+    
+        # for char in first_line:
+        #       alignment_dict[char] = (letter for letter in second_line)
+        # alignment_dict = {
+        #     char: (letter for letter in (second_line)) for char in (first_line)
+        # }
+    print(alignment_table)
+        # alignment_dict = {
+        # 	first_line[index]: second_line[index]
+        # 	for index in range(len(first_line))
+        # }
+    # print(alignment_dict)
+    # for lines in text:
+    #     lines = lines.strip().split()
+    #     print(lines[0])
+        
+        # alignment_dict={item: item for line in lines for item in line.strip().split()}
+    # print(alignment_dict)
+
+
+
+build_alignment_table("01.txt")
 
 # txt_sequences_filepath=sys.argv[1]
 # txt_scoring_filepath=sys.argv[2]
@@ -44,7 +84,7 @@ scoring_matrix('standard.m')
 #         seq_dir_matrix[1][0]="-"
 #         seq_dir_matrix[0][0]="-"
 #         seq_dir_matrix[0][1]="-"
-        
+
 #         for row in range(1,n_len+1):
 #             seq_dir_matrix[row+1][0]=n_str[row-1]
 #             x=int(seq_dir_matrix[row][1][0])+gap_penalty
@@ -58,7 +98,7 @@ scoring_matrix('standard.m')
 #                 if n_str[row-1]==m_str[col-1]:
 #                     temp_str=''
 #                     temp_str=temp_str+n_str[row-1]+m_str[col-1]
-                    
+
 #                     match=int(seq_dir_matrix[row][col][0]) + int(match_dict[temp_str])
 #                     indel_up = int(seq_dir_matrix[row][col+1][0]) + gap_penalty
 #                     indel_left = int(seq_dir_matrix[row+1][col][0]) + gap_penalty
@@ -80,7 +120,7 @@ scoring_matrix('standard.m')
 #                 else:
 #                     temp_str=""
 #                     temp_str=temp_str+ n_str[row-1]+m_str[col-1]
-                    
+
 #                     mismatch=int(seq_dir_matrix[row][col][0])+int(mismatch_dict[temp_str])
 #                     indel_up = int(seq_dir_matrix[row][col+1][0]) + gap_penalty
 #                     indel_left = int(seq_dir_matrix[row+1][col][0]) + gap_penalty
@@ -99,7 +139,7 @@ scoring_matrix('standard.m')
 #                         seq_dir_matrix[row+1][col+1]=[max_score,"left"]
 #                     else:
 #                         seq_dir_matrix[row+1][col+1]=[max_score,"up"]
-            
+
 #         backtracking_path=[]
 #         index_matrix=[]
 #         max_score=seq_dir_matrix[n_len+1][m_len+1][0]
@@ -118,29 +158,29 @@ scoring_matrix('standard.m')
 #             left= seq_dir_matrix[row][col-1][0]
 
 #             if ("diagonal" in seq_dir_matrix[row][col][1]) and ("left" in seq_dir_matrix[row][col][1]) and ("up" in seq_dir_matrix[row][col][1]):
-#                    if diagonal >  up and diagonal > left:   
-#                        seq_dir_matrix[row][col][1]="diagonal" 
+#                    if diagonal >  up and diagonal > left:
+#                        seq_dir_matrix[row][col][1]="diagonal"
 #                        x = row - 1
 #                        row = x
 #                        y = col - 1
 #                        col = y
-#                    elif(left> diagonal and left>up): 
+#                    elif(left> diagonal and left>up):
 #                        seq_dir_matrix[row][col][1]="left"
 #                        y = col - 1
 #                        col = y
-#                    else: 
+#                    else:
 #                        seq_dir_matrix[row][col][1]="up"
 #                        x=row-1
 #                        row=x
 #             elif("diagonal" in seq_dir_matrix[row][col][1]) and ("left" in seq_dir_matrix[row][col][1]):
 #                    if (diagonal>left):
-#                        seq_dir_matrix[row][col][1]="diagonal"     
+#                        seq_dir_matrix[row][col][1]="diagonal"
 #                        x = row - 1
 #                        row = x
 #                        y = col - 1
 #                        col = y
-#                    else:     
-#                        seq_dir_matrix[row][col][1]="left"  
+#                    else:
+#                        seq_dir_matrix[row][col][1]="left"
 #                        y = col - 1
 #                        col = y
 #             elif(("diagonal" in seq_dir_matrix[row][col][1]) and ("up" in seq_dir_matrix[row][col][1])):
@@ -149,18 +189,18 @@ scoring_matrix('standard.m')
 #                        x = row-1
 #                        row=x
 #                        y=col-1
-#                        col=y           
+#                        col=y
 #                    else:
-#                        seq_dir_matrix[row][col][1]="up" 
+#                        seq_dir_matrix[row][col][1]="up"
 #                        x=row-1
-#                        row=x 
+#                        row=x
 #             elif(("left" in seq_dir_matrix[row][col][1]) and ("up" in seq_dir_matrix[row][col][1])):
-#                    if left>up: 
+#                    if left>up:
 #                        seq_dir_matrix[row][col][1]="left"
 #                        y=col-1
 #                        col=y
 #                    else:
-#                        seq_dir_matrix[row][col][1]="up" 
+#                        seq_dir_matrix[row][col][1]="up"
 
 #                        x=row-1
 #                        row=x
@@ -178,20 +218,20 @@ scoring_matrix('standard.m')
 
 #     backtracking_path.insert(0,"")
 #     index_matrix.insert(0,"")
-#     b_len=len(backtracking_path) 
+#     b_len=len(backtracking_path)
 #     b_index=b_len-1
 #     z=0
 
 #     top_strand=["0"]*b_index
 #     bottom_strand=["0"]*b_index
- 
+
 #     while backtracking_path[b_index]!="":
 #         if backtracking_path[b_index][1]=="diagonal":
 #             top_strand[b_index-1] = m_str[index_matrix[b_index][1]-2]
 #             bottom_strand[b_index-1]=n_str[index_matrix[b_index][0]-2]
 #             z=b_index-1
 #             b_index=z
-          
+
 #         elif backtracking_path[b_index][1]=="left" :
 #             top_strand[b_index-1] = m_str[index_matrix[b_index][1]-2]
 #             bottom_strand[b_index-1]="-"
@@ -202,7 +242,7 @@ scoring_matrix('standard.m')
 #             bottom_strand[b_index-1]=n_str[index_matrix[b_index][0]-2]
 #             z=b_index-1
 #             b_index=z
- 
+
 #     print("".join(top_strand[::-1]))
 #     print("".join(bottom_strand[::-1]))
 #     print(max_score)
