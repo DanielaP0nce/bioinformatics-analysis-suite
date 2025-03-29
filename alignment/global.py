@@ -17,7 +17,7 @@ def build_scoring_matrix(file):
     return pd.DataFrame(scoring_dict)
 
 
-def initialize_alignment_table(file):
+def initialize_alignment_table(file,gap_penalty):
     with open(file, "r") as text:
         text = text.readlines()
         first_line = list(text[0].strip())
@@ -27,32 +27,23 @@ def initialize_alignment_table(file):
     alignment_table = pd.DataFrame(np.empty((len(second_line), len(first_line))))
     alignment_table.columns = first_line
     alignment_table.index = second_line
-    first_row_values = np.arange(-1, -(len(first_line)), -1)
-    second_row_values = np.arange(-1, -(len(second_line)), -1)
-    alignment_table.iloc[0,1:]=[item for item in first_row_values]
-    alignment_table.iloc[1:,0]=second_row_values
-    
-        # for char in first_line:
-        #       alignment_dict[char] = (letter for letter in second_line)
-        # alignment_dict = {
-        #     char: (letter for letter in (second_line)) for char in (first_line)
-        # }
+    first_row_values = np.arange(gap_penalty, (len(first_line))*gap_penalty, gap_penalty)
+    second_row_values = np.arange(gap_penalty, (len(second_line))*gap_penalty, gap_penalty)
+    alignment_table.iloc[0, 1:] = first_row_values
+    alignment_table.iloc[1:, 0] = second_row_values
     print(alignment_table)
-        # alignment_dict = {
-        # 	first_line[index]: second_line[index]
-        # 	for index in range(len(first_line))
-        # }
-    # print(alignment_dict)
-    # for lines in text:
-    #     lines = lines.strip().split()
-    #     print(lines[0])
-        
-        # alignment_dict={item: item for line in lines for item in line.strip().split()}
-    # print(alignment_dict)
+    return alignment_table
+initialize_alignment_table("01.txt",-1)
 
+# def needleman_wunsch(alignment_file, scoring_file, gap_penalty):
+#     scoring_table = build_scoring_matrix(scoring_file)
+#     alignment_table = initialize_alignment_table(alignment_file)
+#     alignment_table.iloc[1:, 1:] = scoring_table.values
+#     print(alignment_table)
+    
+# needleman_wunsch("alignment.txt", "01.txt", -1)
+    
 
-
-build_alignment_table("01.txt")
 
 # txt_sequences_filepath=sys.argv[1]
 # txt_scoring_filepath=sys.argv[2]
@@ -248,3 +239,4 @@ build_alignment_table("01.txt")
 #     print(max_score)
 
 # global_alignment(txt_sequences_filepath,txt_scoring_filepath,gap_penalty)
+# source path/to/venv/bin/activate
