@@ -1,7 +1,7 @@
 import sys
 import pandas as pd
 import numpy as np
-from alignment.algorithmns.alignment_utilities import DIAGONAL, UP, LEFT
+from alignment_utilities import DIAGONAL, UP, LEFT
 
 
 def build_scoring_matrix(file):
@@ -26,6 +26,13 @@ def build_scoring_matrix(file):
     except FileNotFoundError:
         print(f"File {file} not found.")
         sys.exit(1)
+    
+    # TODO: Add error handling for incorrect file format
+		# Check if the file has at least two lines
+		# Check matrix dimensions - number of rows and columns
+		# Check that first line has correct header placeholder as first element 
+		# Check each row element matches number of columns 
+    
     nucleotides = text[0].strip().split(" ")[1:]
 
     for lines in text[1:]:
@@ -56,14 +63,18 @@ def initialize_alignment_table(file, gap_penalty):
     except FileNotFoundError:
         print(f"File {file} not found.")
         sys.exit(1)
-
+        
+    try:
+        if len(text) != 2:
+            raise ValueError("File must contain two lines.")
+    except ValueError as e:
+        print(e)
+        sys.exit(1)
+    
     first_sequence = text[0].strip()
     second_sequence = text[1].strip()
-
-    first_line = list(first_sequence)
-    first_line.insert(0, "-")
-    second_line = list(second_sequence)
-    second_line.insert(0, "-")
+    first_line = ["-"] + list(first_sequence)
+    second_line = ["-"] + list(second_sequence)
 
     alignment_table = pd.DataFrame(np.empty(
         (len(second_line), len(first_line))))
@@ -97,8 +108,7 @@ def needleman_wunsch(alignment_file, scoring_file, gap_penalty):
       tuple: A tuple containing the alignment score, the aligned first sequence, and the aligned second sequence.
           The alignment score is an integer representing the optimal score found by the algorithm.
           The aligned sequences are strings representing the sequences after introducing gaps for optimal alignment.
-     Raises:
-      FileNotFoundError: If the specified files do not exist."""
+     """
     # Check if the files exist
 
     scoring_table = build_scoring_matrix(scoring_file)
@@ -128,6 +138,7 @@ def needleman_wunsch(alignment_file, scoring_file, gap_penalty):
     aligned_seq1, aligned_seq2 = backtracking(first_sequence, second_sequence,
                                               pointer_table)
     aligned_score = alignment_table.iloc[-1, -1]
+    
 
     return aligned_score, aligned_seq1, aligned_seq2
 
@@ -185,4 +196,4 @@ def backtracking(seq1, seq2, pointer_table):
     return aligned_seq1, aligned_seq2
 
 
-needleman_wunsch("01.txt", "standard.m", -1)
+print(needleman_wunsch("alignment/test/sequences/01.txt", "alignment/test/matrices/standard.m", -1))
