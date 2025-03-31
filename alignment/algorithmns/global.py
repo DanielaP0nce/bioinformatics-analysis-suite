@@ -1,7 +1,7 @@
 import sys
 import pandas as pd
 import numpy as np
-from alignment_constants import DIAGONAL, UP, LEFT
+from alignment.algorithmns.alignment_utilities import DIAGONAL, UP, LEFT
 
 
 def build_scoring_matrix(file):
