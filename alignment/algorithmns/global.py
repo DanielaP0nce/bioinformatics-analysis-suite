@@ -195,5 +195,15 @@ def backtracking(seq1, seq2, pointer_table):
 
     return aligned_seq1, aligned_seq2
 
+# TODO: transfer build scoring matrix, initialize alignment table and backtracking to alignment_utilities.py
+# TODO: set up Docker
+if __name__ == "__main__":
+    
+	# Example usage
+	alignment_file = "alignment/test/sequences/01.txt"
+	scoring_file = "alignment/test/matrices/standard.m"
+	gap_penalty = -1
+	print(needleman_wunsch(alignment_file, scoring_file, gap_penalty))
+    
 
-print(needleman_wunsch("alignment/test/sequences/01.txt", "alignment/test/matrices/standard.m", -1))
+# print(needleman_wunsch("alignment/test/sequences/01.txt", "alignment/test/matrices/standard.m", -1))
