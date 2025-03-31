@@ -48,9 +48,6 @@ def initialize_alignment_table(file, gap_penalty):
     return alignment_table, pointer_table, first_sequence, second_sequence
 
 
-# initialize_alignment_table("01.txt", -1)
-
-
 def needleman_wunsch(alignment_file, scoring_file, gap_penalty):
     scoring_table = build_scoring_matrix(scoring_file)
     alignment_table, pointer_table, first_sequence, second_sequence = (
@@ -82,40 +79,39 @@ def needleman_wunsch(alignment_file, scoring_file, gap_penalty):
     aligned_seq1, aligned_seq2 = backtracking(
         first_sequence, second_sequence, pointer_table
     )
-    print("Alignment Score: ", alignment_table.iloc[-1, -1])
-    print("Aligned Sequences:")
-    print(aligned_seq1)
-    print(aligned_seq2)
+    aligned_score = alignment_table.iloc[-1, -1]
+    return aligned_score, aligned_seq1, aligned_seq2
+   
 
 
 def backtracking(seq1, seq2, pointer_table):
-    i = len(pointer_table.index) - 1
-    j = len(pointer_table.columns) - 1
+    # Start at bottom-right cell
+    columns = len(pointer_table.columns) - 1 
+    rows = len(pointer_table.index) - 1 
 
     aligned_seq1 = ""
     aligned_seq2 = ""
 
-    while i > 0 or j > 0:
-        current_pointer = pointer_table.iloc[i, j]
-        try:
-            if current_pointer & DIAGONAL and i > 0 and j > 0:
-                # Diagonal move (match/mismatch)
-                aligned_seq1 = seq1[i - 1] + aligned_seq1
-                aligned_seq2 = seq2[j - 1] + aligned_seq2
-                i -= 1
-                j -= 1
-            elif current_pointer & UP and i > 0:
-                # Up move (gap in seq2)
-                aligned_seq1 = seq1[i - 1] + aligned_seq1
-                aligned_seq2 = "-" + aligned_seq2
-                i -= 1
-            elif current_pointer & LEFT and j > 0:
-                # Left move (gap in seq1)
-                aligned_seq1 = "-" + aligned_seq1
-                aligned_seq2 = seq2[j - 1] + aligned_seq2
-                j -= 1
+    while rows > 0 or columns > 0:
+        current_pointer = pointer_table.iloc[rows,columns]
 
-        except:
+        if current_pointer & DIAGONAL and rows > 0 and columns > 0:
+            # Diagonal move (match/mismatch)
+            aligned_seq1 = seq1[columns - 1] + aligned_seq1
+            aligned_seq2 = seq2[rows - 1] + aligned_seq2
+            rows -= 1
+            columns -= 1
+        elif current_pointer & UP and rows > 0:
+            # Up move (gap in seq1)
+            aligned_seq1 = "-" + aligned_seq1
+            aligned_seq2 = seq2[rows - 1] + aligned_seq2
+            rows -= 1
+        elif current_pointer & LEFT and columns > 0:
+            # Up move (gap in seq2)
+            aligned_seq1 = seq1[columns - 1] + aligned_seq1
+            aligned_seq2 = "-" + aligned_seq2
+            columns -= 1
+        else:
             raise ValueError("Invalid pointer value")
     return aligned_seq1, aligned_seq2
 
