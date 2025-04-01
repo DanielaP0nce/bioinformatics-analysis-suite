@@ -1,49 +1,7 @@
 import sys
 import pandas as pd
 import numpy as np
-from alignment_utilities import DIAGONAL, UP, LEFT
-
-
-def build_scoring_matrix(file):
-    """Builds a scoring matrix from a file.
-
-    The file should be a text file with the scoring matrix in the following format:
-    The first line should contain the nucleotides, separated by spaces.
-    The following lines should contain the scores for each nucleotide, with the first element being the nucleotide and the following elements being the scores for each nucleotide in the order specified in the first line.
-    
-    Args:
-		file (str): The path to the file containing the scoring matrix.
-	Raises:
-		FileNotFoundError: If the file does not exist.
-		ValueError: If the file is not in the correct format.
-	Returns:
-		dict: A dictionary representing the scoring matrix. The keys are the nucleotides, and the values are dictionaries containing the scores for each nucleotide.
-    """
-    scoring_dict = {}
-    try:
-        with open(file, "r") as text:
-            text = text.readlines()
-    except FileNotFoundError:
-        print(f"File {file} not found.")
-        sys.exit(1)
-    
-    # TODO: Add error handling for incorrect file format
-		# Check if the file has at least two lines
-		# Check matrix dimensions - number of rows and columns
-		# Check that first line has correct header placeholder as first element 
-		# Check each row element matches number of columns 
-    
-    nucleotides = text[0].strip().split(" ")[1:]
-
-    for lines in text[1:]:
-        lines = lines.strip().split()
-        scoring_dict[lines[0]] = {
-            nucleotides[index - 1]: lines[index]
-            for index in range(1,
-                               len(nucleotides) + 1)
-        }
-
-    return scoring_dict
+from utilities import DIAGONAL, UP, LEFT, generate_scoring_matrix 
 
 
 def initialize_alignment_table(file, gap_penalty):
@@ -97,6 +55,7 @@ def initialize_alignment_table(file, gap_penalty):
     return alignment_table, pointer_table, first_sequence, second_sequence
 
 
+
 def needleman_wunsch(alignment_file, scoring_file, gap_penalty):
     """
      Performs global alignment of two sequences using the Needleman-Wunsch algorithm.
@@ -111,7 +70,7 @@ def needleman_wunsch(alignment_file, scoring_file, gap_penalty):
      """
     # Check if the files exist
 
-    scoring_table = build_scoring_matrix(scoring_file)
+    scoring_table = generate_scoring_matrix(scoring_file)
     alignment_table, pointer_table, first_sequence, second_sequence = (
         initialize_alignment_table(alignment_file, gap_penalty))
 
@@ -134,7 +93,7 @@ def needleman_wunsch(alignment_file, scoring_file, gap_penalty):
                 direction |= LEFT
 
             pointer_table.iloc[index, column] = direction
-
+    
     aligned_seq1, aligned_seq2 = backtracking(first_sequence, second_sequence,
                                               pointer_table)
     aligned_score = alignment_table.iloc[-1, -1]
@@ -203,7 +162,6 @@ if __name__ == "__main__":
 	alignment_file = "alignment/test/sequences/01.txt"
 	scoring_file = "alignment/test/matrices/standard.m"
 	gap_penalty = -1
-	print(needleman_wunsch(alignment_file, scoring_file, gap_penalty))
+	needleman_wunsch(alignment_file, scoring_file, gap_penalty)
     
 
-# print(needleman_wunsch("alignment/test/sequences/01.txt", "alignment/test/matrices/standard.m", -1))
